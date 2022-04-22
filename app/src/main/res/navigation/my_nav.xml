@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/my_nav"
+    app:startDestination="@id/getLocFragment">
+
+    <fragment
+        android:id="@+id/getLocFragment"
+        android:name="com.example.drill2.GetLocFragment"
+        android:label="fragment_get_loc"
+        tools:layout="@layout/fragment_get_loc" >
+        <action
+            android:id="@+id/action_getLocFragment_to_contactsList"
+            app:destination="@id/contactsList" />
+    </fragment>
+    <fragment
+        android:id="@+id/contactsList"
+        android:name="com.example.drill2.ContactsList"
+        android:label="fragment_contacts_list"
+        tools:layout="@layout/fragment_contacts_list" />
+</navigation>
