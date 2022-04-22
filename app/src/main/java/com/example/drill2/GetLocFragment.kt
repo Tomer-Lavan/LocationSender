@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -43,37 +44,15 @@ class GetLocFragment : Fragment() {
 
     var btnLocState = 0
 
+    var btnShareState = 0
+
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     @RequiresApi(Build.VERSION_CODES.N)
-    val locationPermissionLauncher  = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                Toast.makeText(this.requireContext(),"got permission",Toast.LENGTH_SHORT).show()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                Toast.makeText(this.requireContext(),"got aprox permission",Toast.LENGTH_SHORT).show()
-            } else -> {
-                Toast.makeText(this.requireContext(),"no permission",Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+    val locationPermissionLauncher  = requestLocPermission()
 
     @RequiresApi(Build.VERSION_CODES.N)
-    val contactsPermissionLauncher  = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.READ_CONTACTS, false) -> {
-                findNavController().navigate(R.id.action_getLocFragment_to_contactsList)
-                Toast.makeText(this.requireContext(),"got permission",Toast.LENGTH_SHORT).show()
-            } else -> {
-                Toast.makeText(this.requireContext(),"no permission",Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-
+    val contactsPermissionLauncher  = requestContactPermission()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,9 +74,7 @@ class GetLocFragment : Fragment() {
         binding.linearLayout.setOnClickListener {
             if(ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                locationPermissionLauncher.launch(arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION))
+                locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
             } else {
                 val geocoder : Geocoder = Geocoder(this.requireContext(), Locale.getDefault())
                 val task: Task<Location> = fusedLocationProviderClient.lastLocation
@@ -133,6 +110,7 @@ class GetLocFragment : Fragment() {
             binding.textView.setTextColor(resources.getColor(R.color.pale_blue))
             btnLocState = 1
         } else {
+            binding.linearLayout.background = resources.getDrawable(R.drawable.my_loc_not_pressed)
             binding.imageView.background = resources.getDrawable(R.drawable.ic_location)
             binding.textView.setTextColor(resources.getColor(R.color.white))
             btnLocState = 0
@@ -141,18 +119,57 @@ class GetLocFragment : Fragment() {
 
     fun createViews(address : String) {
         binding.yourLoc.text = "Your Location is:\n${address}\n"
-        val shareButton = Button(this.requireContext())
-        shareButton.text = "Share"
-        binding.allViews.addView(shareButton)
-        shareButton.setOnClickListener {
-            if(ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED){
-                contactsPermissionLauncher.launch(arrayOf(
-                    Manifest.permission.READ_CONTACTS))
-            } else {
-                findNavController().navigate(R.id.action_getLocFragment_to_contactsList)
+        if (btnShareState == 0) {
+            val shareButton = Button(this.requireContext())
+            shareButton.text = "Share"
+            binding.allViews.addView(shareButton)
+            btnShareState = 1
+            shareButton.setOnClickListener {
+                if (ActivityCompat.checkSelfPermission(
+                        this.requireContext(), Manifest.permission.READ_CONTACTS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                    contactsPermissionLauncher.launch(arrayOf(Manifest.permission.READ_CONTACTS))
+                } else {
+                    findNavController().navigate(R.id.action_getLocFragment_to_contactsList)
+                }
             }
         }
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun requestLocPermission(): ActivityResultLauncher<Array<String>> {
+        val locationPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    Toast.makeText(this.requireContext(),"got permission",Toast.LENGTH_SHORT).show()
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    Toast.makeText(this.requireContext(),"got aprox permission",Toast.LENGTH_SHORT).show()
+                } else -> {
+                Toast.makeText(this.requireContext(),"no permission",Toast.LENGTH_SHORT).show()
+            }
+            }
+        }
+        return locationPermissionLauncher
+    }
+
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun requestContactPermission(): ActivityResultLauncher<Array<String>> {
+        val contactsPermissionLauncher  = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.READ_CONTACTS, false) -> {
+                    findNavController().navigate(R.id.action_getLocFragment_to_contactsList)
+                    Toast.makeText(this.requireContext(),"got permission",Toast.LENGTH_SHORT).show()
+                } else -> {
+                Toast.makeText(this.requireContext(),"no permission",Toast.LENGTH_SHORT).show()
+            }
+            }
+        }
+        return contactsPermissionLauncher
     }
 
 
