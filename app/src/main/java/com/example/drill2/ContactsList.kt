@@ -18,16 +18,6 @@ import com.example.drill2.databinding.FragmentContactsListBinding
 import com.example.drill2.databinding.FragmentGetLocBinding
 import com.example.drill2.databinding.FragmentYourLocationBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [ContactsList.newInstance] factory method to
- * create an instance of this fragment.
- */
 class ContactsList : Fragment() {
 
     private var _binding: FragmentContactsListBinding? = null
@@ -37,33 +27,26 @@ class ContactsList : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.recycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycler.adapter =
-            ContactAdapter(ContactsManager.contacts, object : ContactAdapter.ContactListener {
-                override fun onContactClicked(index: Int) {
-                    //Toast.makeText(requireContext(), "${ContactsManager.contacts[index]}", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "address")
-                    }
-                    startActivity(intent)
+        binding.recycler.adapter = ContactAdapter(ContactsManager.contacts, object : ContactAdapter.ContactListener {
+            override fun onContactClicked(index: Int) {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, "address")
                 }
+                startActivity(intent)
+            }
 
-                override fun onContactLongClick(index: Int) {
-                    TODO("Not yet implemented")
-                }
-            })
-
+            override fun onContactLongClick(index: Int) {
+                TODO("Not yet implemented")
+            }
+        })
     }
 
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         _binding = FragmentContactsListBinding.inflate(inflater,container,false)
         getContacts()
-
         return binding.root
     }
 
@@ -78,10 +61,15 @@ class ContactsList : Fragment() {
                     val contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME))
                     val contact = Contact(contactName)
                     ContactsManager.add(contact)
-                    Log.i("CONTACTS_NAMES", contactName)
+                    //Log.i("CONTACTS_NAMES", contactName)
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
 }

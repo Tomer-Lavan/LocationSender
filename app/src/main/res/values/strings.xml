@@ -3,4 +3,9 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="your_location_is">Your Location is:</string>
+    <string name="my_location">My Location</string>
+    <string name="permission_explanation">You denied Location permission but the app needs it. Go to \'App Settings\' to grant location permissions.</string>
+    <string name="settings">Settings</string>
+    <string name="share">Share</string>
+    <string name="no">NO!</string>
 </resources>

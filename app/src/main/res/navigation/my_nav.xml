@@ -13,10 +13,18 @@
         <action
             android:id="@+id/action_getLocFragment_to_contactsList"
             app:destination="@id/contactsList" />
+        <action
+            android:id="@+id/action_getLocFragment_to_permissionNotApproved"
+            app:destination="@id/permissionNotApproved" />
     </fragment>
     <fragment
         android:id="@+id/contactsList"
         android:name="com.example.drill2.ContactsList"
         android:label="fragment_contacts_list"
         tools:layout="@layout/fragment_contacts_list" />
+    <fragment
+        android:id="@+id/permissionNotApproved"
+        android:name="com.example.drill2.PermissionNotApproved"
+        android:label="fragment_permission_not_approved"
+        tools:layout="@layout/fragment_permission_not_approved" />
 </navigation>
