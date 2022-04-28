@@ -5,10 +5,12 @@ import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
+import android.media.VolumeShaper
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -29,6 +31,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.drill2.databinding.FragmentGetLocBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,6 +41,8 @@ import com.google.android.gms.tasks.Task
 import java.util.*
 
 class GetLocFragment : Fragment() {
+
+    private val viewModel by activityViewModels<MainViewModel>()
 
     private var _binding: FragmentGetLocBinding? = null
 
@@ -62,8 +68,7 @@ class GetLocFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         _binding = FragmentGetLocBinding.inflate(inflater,container,false)
 
@@ -73,6 +78,10 @@ class GetLocFragment : Fragment() {
 
         binding.linearLayout.setOnClickListener {
             checkLocationPermission(fusedLocationProviderClient)
+        }
+
+        viewModel.address.observe(viewLifecycleOwner) {
+            createViews(it)
         }
 
         return binding.root
@@ -98,7 +107,13 @@ class GetLocFragment : Fragment() {
             val shareButton = Button(this.requireContext())
             shareButton.text = resources.getString(R.string.share)
             shareButton.background = resources.getDrawable(R.drawable.btn_back)
-            binding.allViews.addView(shareButton)
+            val orientationConfigur = resources.configuration.orientation
+            if (orientationConfigur == Configuration.ORIENTATION_LANDSCAPE) {
+                binding.textAndBtn?.addView(shareButton)
+            }
+            else {
+                binding.allViews.addView(shareButton)
+            }
             btnShareState = 1
             shareButton.setOnClickListener {
                 checkContactsPermission()
@@ -166,6 +181,7 @@ class GetLocFragment : Fragment() {
             if(it != null){
                 var addresses = geocoder.getFromLocation(it.latitude, it.longitude, 1)
                 var address = addresses.get(0).getAddressLine(0)
+                viewModel.setAddress(address)
                 createViews(address)
             }
         }
