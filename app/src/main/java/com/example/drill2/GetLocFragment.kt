@@ -2,6 +2,7 @@ package com.example.drill2
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -32,7 +33,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.drill2.databinding.FragmentGetLocBinding
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -77,7 +77,9 @@ class GetLocFragment : Fragment() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this.requireContext())
 
         binding.linearLayout.setOnClickListener {
-            checkLocationPermission(fusedLocationProviderClient)
+            if (locationServiceIsEnabled()) {
+                checkLocationPermission(fusedLocationProviderClient)
+            }
         }
 
         viewModel.address.observe(viewLifecycleOwner) {
@@ -158,7 +160,12 @@ class GetLocFragment : Fragment() {
         if(ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
             locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-        } else  {
+        }
+        else if (ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        }
+        else  {
             getLoc(fusedLocationProviderClient)
         }
     }
@@ -173,6 +180,7 @@ class GetLocFragment : Fragment() {
         }
     }
 
+    // maybe it is better to run this in a thread
     @SuppressLint("MissingPermission")
     private fun getLoc(fusedLocationProviderClient: FusedLocationProviderClient) {
         val geocoder : Geocoder = Geocoder(this.requireContext(), Locale.getDefault())
@@ -182,7 +190,6 @@ class GetLocFragment : Fragment() {
                 var addresses = geocoder.getFromLocation(it.latitude, it.longitude, 1)
                 var address = addresses.get(0).getAddressLine(0)
                 viewModel.setAddress(address)
-                createViews(address)
             }
         }
         changeButtonColor()
@@ -190,7 +197,7 @@ class GetLocFragment : Fragment() {
 
     private fun notApprovedContactsPermisDialog() {
         val builder = AlertDialog.Builder(this.requireContext())
-        builder.setMessage("Please grant access to contacts")
+        builder.setMessage(getString(R.string.grant_access_to_contacts))
         builder.setPositiveButton(resources.getString(R.string.settings), DialogInterface.OnClickListener { dialog, id ->
             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                 data = Uri.parse("package:${context?.packageName}")
@@ -200,6 +207,23 @@ class GetLocFragment : Fragment() {
         val dialog = builder.create()
         dialog.show()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(resources.getColor(R.color.red))
+    }
+
+    fun locationServiceIsEnabled(): Boolean {
+        val locationManag: LocationManager = context?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if(!locationManag.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            val builder = AlertDialog.Builder(this.requireContext())
+            builder.setMessage(getString(R.string.enable_location))
+            builder.setPositiveButton(resources.getString(R.string.ok), DialogInterface.OnClickListener { dialog, id ->
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                activity?.startActivity(intent)
+            })
+            builder.setNegativeButton(resources.getString(R.string.no_thanks),null)
+            val dialog = builder.create()
+            dialog.show()
+            return false
+        }
+        return true
     }
 
 

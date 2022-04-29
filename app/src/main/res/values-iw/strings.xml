@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Drill2</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">שלום</string>
+    <string name="your_location_is">המיקום שלך הוא:</string>
+    <string name="my_location">המיקום שלי</string>
+    <string name="permission_explanation">לא אישרת שימוש במיקום מדויק אבל האפליקציה צריכה אותו כדי לתפקד קשורה. לחץ על \'הגדרות\' כדי לפתוח את הגדרות האפליקציה ולהעניק הרשאות מיקום.</string>
+    <string name="settings">הגדרות</string>
+    <string name="share">שתף</string>
+    <string name="no">לא!</string>
+    <string name="ok">אוקי</string>
+    <string name="no_thanks">לא תודה</string>
+    <string name="grant_access_to_contacts">בבקשה תאשר גישה לאנשי קשר</string>
+    <string name="enable_location">בבקשה תפתח את שירותי המיקום</string>
+</resources>

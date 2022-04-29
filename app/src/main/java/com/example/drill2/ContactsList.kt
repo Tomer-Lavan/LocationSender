@@ -18,7 +18,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.drill2.databinding.FragmentContactsListBinding
 import com.example.drill2.databinding.FragmentGetLocBinding
-import com.example.drill2.databinding.FragmentYourLocationBinding
 
 class ContactsList : Fragment() {
 
@@ -58,6 +57,7 @@ class ContactsList : Fragment() {
         return binding.root
     }
 
+    //maybe will improve later by getting the contacts just once and insert to the viewModel
     @SuppressLint("Range")
     fun getContacts(){
         val contentResolver : ContentResolver = requireActivity().contentResolver
